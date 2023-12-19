@@ -92,6 +92,13 @@ We can do the exact same thing with increasingly large file names, has the funct
 
 ![overflow-gef](./prints/2023-12-18_12-12.png)
 
+Besides the exploit discovered above, there is also one way to crash the application. Which is by running it with directory as argument(instead of a normal file).
+
+![](./prints/player_dir_arg.png)
+
+
+This crash is happening because the program is not validating if the file passed as argument is a directory. S\_ISDIR(m) macro from linux(https://www.gnu.org/software/libc/manual/html_node/Testing-File-Type.html) could be used to check if it's a directory and fix the problem.
+
 <P style="page-break-before: always">
 
 # Author
