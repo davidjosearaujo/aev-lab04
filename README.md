@@ -92,7 +92,7 @@ We can do the exact same thing with increasingly large file names, has the funct
 
 Besides the exploit discovered above, there is also one way to crash the application. Which is by running it with directory as argument(instead of a normal file).
 
-![](./prints/player_dir_arg.png)
+![Output when using a directory as a input file](./prints/player_dir_arg.png)
 
 
 This crash is happening because the program is not validating if the file passed as argument is a directory. S\_ISDIR(m) macro from linux(https://www.gnu.org/software/libc/manual/html_node/Testing-File-Type.html) could be used to check if it's a directory and fix the problem.
@@ -106,9 +106,9 @@ printf(" Name: ");
 printf(filename);
 ```
 
-A `printf` without arguments is being used, and the user has full access to the variable `filename` because is given by him. In formated strings the '%p' can be used to print the address of a variable inside the `printf` arguments.When the `printf`  has no argumets, it will go to the stack the get the values. 
+A `printf` without arguments is being used, and the user has full access to the variable `filename` because is given by him. In formated strings the '%x' can be used to print the values in hex of a variable inside the `printf` arguments. When the `printf`  has no argumets, it will go to the stack the get the values. 
 
-![](./prints/1.png)
+![Output when using '%x %x %x %x'](./prints/1.png)
 
 ## 4
 
@@ -139,7 +139,7 @@ So, the same payload was used and introduced in the title field using `id3v2 --T
 ## 5
 As we see, the `printf` and does not have arguments try to find them in the stack, but the values that end up being used might not be formated in such way that can be converted into a string. So, if a `%s` is given to the `printf` we can have a DoS (it crashes).
 
-![](./prints/2.png)
+![Output when using '%s' as file name](./prints/2.png)
 
 ## 6
 The main steps in order to perform the exploit are:
