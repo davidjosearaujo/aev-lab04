@@ -37,9 +37,10 @@ By running `flawfinder` within the _player_ directory, after running the `make`c
 
 ![flawfinder usage in player directory](./prints/Screenshot%20from%202023-12-17%2012-11-34.png)
 
-<P style="page-break-before: always">
 
 From this we are able to identify five possible flaws within the _player.c_ code. Two of this flaws are considered as "buffer flaws" and described as: **statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)**.
+
+\pagebreak
 
 ```C
 16  #define FIELD_BUFFER_SIZE 16
@@ -62,6 +63,8 @@ By then analyzing the code, we discover that one of the possible _buffer overflo
 ## 2
 To test this, we created a simple _bash_ script that tries to run the music player with an increasingly large title. If the execution crashes, it outputs the title that has caused it.
 
+\pagebreak
+
 ```Bash
 #!/bin/bash
 TITLE="A"
@@ -80,7 +83,6 @@ do
 done
 ```
 
-<P style="page-break-before: always">
 
 This test proves successful and we get the following output.
 
@@ -97,7 +99,6 @@ Besides the exploit discovered above, there is also one way to crash the applica
 
 This crash is happening because the program is not validating if the file passed as argument is a directory. S\_ISDIR(m) macro from linux(https://www.gnu.org/software/libc/manual/html_node/Testing-File-Type.html) could be used to check if it's a directory and fix the problem.
 
-<P style="page-break-before: always">
 
 ## 3
 The filename is being printed as follows:
@@ -150,8 +151,6 @@ The main steps in order to perform the exploit are:
 
 - Overwrite the return address with a pointer to our code, to get it executed.
 
-
-
 # TryHackMe - Buffer Overflow Prep
 
 ## Overflow 1
@@ -170,7 +169,6 @@ From that, we can now specify whichever payload we desire. Using a long string o
 
 ![BadCharacters found](./prints/2023-12-19_12-35.png)
 
-<P style="page-break-before: always">
 
 We do this until there are no more characters that do not match, this way we can assure that we are able to fully write to the desired memory space.
 
@@ -179,8 +177,6 @@ We do this until there are no more characters that do not match, this way we can
 Continuing the attack, 9 addresses are exposed to where we can know direct our exploitation payload in order to initiate a connection from the server to the client, a _reverse shell_
 
 ![_jmp_ registers](./prints/2023-12-19_12-49.png)
-
-<P style="page-break-before: always">
 
 This payload can be crafted with another of MetaSploit's tools.
 
@@ -192,10 +188,7 @@ By initiation `netcat` and commanding it to accept incoming connection, we can t
 
 The other Overflows function exactly the same way, please view the annex at the end of this report to view which offset and _bad characters_ were found for each one.
 
-<P style="page-break-before: always">
 
 # TryHackMe - Intro to Pwntools
 
 Consult the annexes
-
-<P style="page-break-before: always">
