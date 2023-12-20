@@ -1,5 +1,5 @@
 <!--
- Copyright 2023 David Araújo
+ Copyright 2023 David Araújo, Diogo Matos, Tiago Silvestre
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,57 +16,13 @@
 
 # Lab 04 - Buffer Overflow
 
-## TryHackMe - Buffer Overflow Prep
-
-### Overflow 1
-
-Using the _fuzzer_, we are able to discover that the server crashes with 2000 bytes, so adding 400 bytes to that we can use MetaSploit's pattern creator to generate a 2400 byte pattern to use as payload. Using that as a payload we that can find the content of the _EIP_ register, being the offset **1970**.
-
-![EIP-offset](./prints/2023-12-19_12-09.png)
-
-After setting this value in the _exploit_ script and running it again with the value B (in hexadecimal, 0x42) in the _retn_ variable, we can see that the EIP register takes this value.
-
-![EIP-BBBB](./prints/2023-12-19_12-18.png)
-
-From that, we can now specify whichever payload we desire. Using a long string of known value on both the server side and the attacker side, we can test which characters do not match, the _bad characters_.
-
-![ESP](./prints/2023-12-19_12-31.png)
-
-![BadCharacters](./prints/2023-12-19_12-35.png)
-
-We do this until there are no more characters that do not match, this way we can assure that we are able to fully write to the desired memory space.
-
-![Unmodified](./prints/2023-12-19_12-46.png)
-
-Continuing the attack, 9 addresses are exposed to where we can know direct our exploitation payload in order to initiate a connection from the server to the client, a _reverse shell_
-
-![jmp](./prints/2023-12-19_12-49.png)
-
-<P style="page-break-before: always">
-
-This payload can be crafted with another of MetaSploit's tools.
-
-![C-payload](./prints/2023-12-19_15-35.png)
-
-By initiation `netcat` and commanding it to accept incoming connection, we can then send the exploit to the server, and this results in a successful connection between the server and the attacker through a shell.
-
-![reverse-shell](./prints/2023-12-19_16-00.png)
-
-The other Overflows function exactly the same way, please view the annex at the end of this report to view which offset and _bad characters_ were found for each one.
-
-<P style="page-break-before: always">
-
-## TryHackMe - Intro to Pwntools
-
-
-
-<P style="page-break-before: always">
-
 ## Player
 
 By running `flawfinder` within the _player_ directory, after running the `make`command, the tool returns the following output.
 
 ![flawfinder](./prints/Screenshot%20from%202023-12-17%2012-11-34.png)
+
+<P style="page-break-before: always">
 
 From this we are able to identify five possible flaws within the _player.c_ code. Two of this flaws are considered as "buffer flaws" and described as: **statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)**.
 
@@ -108,6 +64,8 @@ do
 done
 ```
 
+<P style="page-break-before: always">
+
 This test proves successful and we get the following output.
 
 ![title-overflow](./prints/2023-12-17_17-52.png)
@@ -125,7 +83,55 @@ This crash is happening because the program is not validating if the file passed
 
 <P style="page-break-before: always">
 
-# Author
+## TryHackMe - Buffer Overflow Prep
+
+### Overflow 1
+
+Using the _fuzzer_, we are able to discover that the server crashes with 2000 bytes, so adding 400 bytes to that we can use MetaSploit's pattern creator to generate a 2400 byte pattern to use as payload. Using that as a payload we that can find the content of the _EIP_ register, being the offset **1970**.
+
+![EIP-offset](./prints/2023-12-19_12-09.png)
+
+After setting this value in the _exploit_ script and running it again with the value B (in hexadecimal, 0x42) in the _retn_ variable, we can see that the EIP register takes this value.
+
+![EIP-BBBB](./prints/2023-12-19_12-18.png)
+
+From that, we can now specify whichever payload we desire. Using a long string of known value on both the server side and the attacker side, we can test which characters do not match, the _bad characters_.
+
+![ESP](./prints/2023-12-19_12-31.png)
+
+![BadCharacters](./prints/2023-12-19_12-35.png)
+
+<P style="page-break-before: always">
+
+We do this until there are no more characters that do not match, this way we can assure that we are able to fully write to the desired memory space.
+
+![Unmodified](./prints/2023-12-19_12-46.png)
+
+Continuing the attack, 9 addresses are exposed to where we can know direct our exploitation payload in order to initiate a connection from the server to the client, a _reverse shell_
+
+![jmp](./prints/2023-12-19_12-49.png)
+
+<P style="page-break-before: always">
+
+This payload can be crafted with another of MetaSploit's tools.
+
+![C-payload](./prints/2023-12-19_15-35.png)
+
+By initiation `netcat` and commanding it to accept incoming connection, we can then send the exploit to the server, and this results in a successful connection between the server and the attacker through a shell.
+
+![reverse-shell](./prints/2023-12-19_16-00.png)
+
+The other Overflows function exactly the same way, please view the annex at the end of this report to view which offset and _bad characters_ were found for each one.
+
+<P style="page-break-before: always">
+
+## TryHackMe - Intro to Pwntools
+
+Consult the annexes
+
+<P style="page-break-before: always">
+
+# Authors
 
 - David Araújo, 93444 - [davidaraujo@ua.pt](mailto:davidaraujo@ua.pt)
 - Diogo Matos, 102848 - [dftm@ua.pt](mailto:dftm@ua.pt)
