@@ -14,10 +14,25 @@
  limitations under the License.
 -->
 
-# Lab 04 - Buffer Overflow
+---
+geometry: margin=25mm
+title: AEV - Lab. 4
+author: David Araújo - 93444, Diogo Matos - 102848, Tiago Silvestre - 103554
+date: December 20, 2023
+---
 
-## Player
+# Table of Contents
+1. [Introduction](#introduction)
+2. [Player](#player)
+3. [Buffer Overflow TyHackMe](#tryhackme---buffer-overflow-prep)
 
+
+# Introduction
+The objective of this report is to explore buffer overflows. 
+
+# Player
+
+## 1
 By running `flawfinder` within the _player_ directory, after running the `make`command, the tool returns the following output.
 
 ![flawfinder](./prints/Screenshot%20from%202023-12-17%2012-11-34.png)
@@ -44,6 +59,7 @@ By then analyzing the code, we discover that one of the possible _buffer overflo
 
 ![title-buffer-code](./prints/2023-12-17_14-01.png)
 
+## 2
 To test this, we created a simple _bash_ script that tries to run the music player with an increasingly large title. If the execution crashes, it outputs the title that has caused it.
 
 ```Bash
@@ -83,9 +99,62 @@ This crash is happening because the program is not validating if the file passed
 
 <P style="page-break-before: always">
 
-## TryHackMe - Buffer Overflow Prep
+## 3
+The filename is being printed as follows:
+```C
+printf(" Name: ");
+printf(filename);
+```
 
-### Overflow 1
+A `printf` without arguments is being used, and the user has full access to the variable `filename` because is given by him. In formated strings the '%p' can be used to print the address of a variable inside the `printf` arguments.When the `printf`  has no argumets, it will go to the stack the get the values. 
+
+![](./prints/1.png)
+
+## 4
+
+The same can be done with the metadata field because of this method:
+```
+int print_meta(char* filename) {
+	ID3Tag *tag = ID3Tag_New();
+
+	printf("File Information\n");
+	printf(" Name: ");
+	printf(filename);
+	ID3Tag_Link(tag, filename);	
+	ID3Frame* frame = ID3Tag_FindFrameWithID(tag, ID3FID_TITLE);
+	print_frame("\n Title", frame);
+	frame = ID3Tag_FindFrameWithID(tag, ID3FID_ALBUM);
+	print_frame(" Album", frame);
+	frame = ID3Tag_FindFrameWithID(tag, ID3FID_PERFORMERSORTORDER);
+	print_frame(" Performer", frame);
+	frame = ID3Tag_FindFrameWithID(tag, ID3FID_COMMENT);
+	print_frame(" Comments", frame);
+}	
+```
+
+As we can see the `printf` is being used as before.
+
+So, the same payload was used and introduced in the title field using `id3v2 --TIT2 "%x %x %x %x" music.mp`.
+
+## 5
+As we see, the `printf` and does not have arguments try to find them in the stack, but the values that end up being used might not be formated in such way that can be converted into a string. So, if a `%s` is given to the `printf` we can have a DoS (it crashes).
+
+![](./prints/2.png)
+
+## 6
+The main steps in order to perform the exploit are:
+
+- Inject into the server process a malicous code that we want to execute.
+
+- Overflow the buffer in order to reach the return address of the vulnerable function.
+
+- Overwrite the return address with a pointer to our code, to get it executed.
+
+
+
+# TryHackMe - Buffer Overflow Prep
+
+## Overflow 1
 
 Using the _fuzzer_, we are able to discover that the server crashes with 2000 bytes, so adding 400 bytes to that we can use MetaSploit's pattern creator to generate a 2400 byte pattern to use as payload. Using that as a payload we that can find the content of the _EIP_ register, being the offset **1970**.
 
@@ -125,16 +194,8 @@ The other Overflows function exactly the same way, please view the annex at the 
 
 <P style="page-break-before: always">
 
-## TryHackMe - Intro to Pwntools
+# TryHackMe - Intro to Pwntools
 
 Consult the annexes
 
 <P style="page-break-before: always">
-
-# Authors
-
-- David Araújo, 93444 - [davidaraujo@ua.pt](mailto:davidaraujo@ua.pt)
-- Diogo Matos, 102848 - [dftm@ua.pt](mailto:dftm@ua.pt)
-- Tiago Silvestre 103554 - [tiago.silvestre@ua.pt](mailto:tiago.silvestre@ua.pt)
-
-Report submitted for the Lab 04 of the _Analysis and Vulnerability Exploitation_ course at the University of Aveiro.
